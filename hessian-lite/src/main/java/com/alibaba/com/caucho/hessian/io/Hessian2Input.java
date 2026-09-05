@@ -2921,6 +2921,14 @@ public class Hessian2Input
         String type = readString();
         int len = readInt();
 
+        // one byte per field name minimum, so the count is bounded by
+        // the remaining bytes
+        long remaining = _length - _offset + (long) _is.available();
+
+        if (len > remaining)
+            throw error("bad field count " + len + " in object definition '"
+                    + type + "', only " + remaining + " bytes left");
+
         SerializerFactory factory = findSerializerFactory();
 
         Deserializer reader = factory.getObjectDeserializer(type, null);
